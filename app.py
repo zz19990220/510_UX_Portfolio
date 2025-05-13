@@ -1,17 +1,12 @@
-# Leon Zhang – Streamlit Portfolio Web
-# -------------------------------------------------
-# Minimal but extensible template that meets the rubric:
-# • Single‑file Streamlit app (`app.py`)
-# • Clean documentation/comments
-# • Runs without error (tested with Streamlit ≥1.32)
-# • Easy‑to‑use navigation + responsive layout (UI/UX)
-# • Extras: bilingual toggle, sidebar nav, light theme accent colour,
-#           data‑driven project section → room for complexity points
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃  Leon Zhang – Streamlit Portfolio Web                  ┃
+# ┃  Single-file app │ 双语切换 │ 侧边栏导航 │ 图像优雅降级  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import streamlit as st
 from pathlib import Path
 
-# ---------- CONFIG -----------------------------------------------------------
+# ─── CONFIG ──────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Leon Zhang Portfolio",
     page_icon="😊",
@@ -19,9 +14,20 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ---------- DATA -------------------------------------------------------------
-# 🗒️  ----  Centralised content so you can maintain translations easily ----
+# ─── CUSTOM CSS ──────────────────────────────────────────────────────────────
+st.markdown(
+    """
+    <style>
+      /* 把侧边栏背景改为浅灰 */
+      [data-testid="stSidebar"] { background-color: #f7f8fa; }
+      /* 给主区内容添加一点内边距 */
+      .css-18e3th9 { padding-top:1rem; padding-left:2rem; padding-right:2rem; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
+# ─── DATA ────────────────────────────────────────────────────────────────────
 LANGS = ["English", "中文"]
 
 CONTENT = {
@@ -29,15 +35,16 @@ CONTENT = {
         "hero_title": "🥳 Hi there!<br>This is Leon 张曾.<br>A product designer",
         "about_title": "Hey~",
         "about_body": (
-            "I'm an <b>HCI Master's candidate @ University of Washington</b>, actively "
-            "seeking a 2024 summer internship. My expertise lies in creating cutting‑edge, "
-            "impactful products by integrating emerging technologies and employing human‑centric methodologies."
+            "I'm an <b>HCI Master's candidate @ University of Washington</b>, "
+            "actively seeking a 2024 summer internship. My expertise lies in creating "
+            "cutting-edge, impactful products by integrating emerging technologies "
+            "and employing human-centric methodologies."
         ),
         "projects": [
             {
-                "name": "Intelligent Air‑Inflated Protective Jacket",
-                "subtitle": "User‑research driven wearable safety system",
-                "img": "images/jacket.png",  # ← drop images in /images
+                "name": "Intelligent Air-Inflated Jacket",
+                "subtitle": "Wearable safety system (user-research driven)",
+                "img": "images/jacket.png",
                 "link": "https://example.com/project1",
             },
             {
@@ -48,7 +55,7 @@ CONTENT = {
             },
             {
                 "name": "Air Provision",
-                "subtitle": "Modern home‑ware store concept",
+                "subtitle": "Modern home-ware store concept",
                 "img": "images/airprovision.png",
                 "link": "https://example.com/project3",
             },
@@ -61,8 +68,8 @@ CONTENT = {
         ],
         "contact": {
             "Email": "zhangzeng1999@gmail.com",
-            "LinkedIn": "https://www.linkedin.com/in/leon‑zhang‑ux/",
-            "GitHub": "https://github.com/leonz‑ux",
+            "LinkedIn": "https://www.linkedin.com/in/leon-zhang-ux/",
+            "GitHub": "https://github.com/leonz-ux",
             "Resume (PDF)": "https://leonzhang.framer.website/resume.pdf",
         },
     },
@@ -101,16 +108,21 @@ CONTENT = {
         ],
         "contact": {
             "邮箱": "zhangzeng1999@gmail.com",
-            "LinkedIn": "https://www.linkedin.com/in/leon‑zhang‑ux/",
-            "GitHub": "https://github.com/leonz‑ux",
+            "LinkedIn": "https://www.linkedin.com/in/leon-zhang-ux/",
+            "GitHub": "https://github.com/leonz-ux",
             "简历 (PDF)": "https://leonzhang.framer.website/resume.pdf",
         },
     },
 }
 
-# ---------- SIDEBAR ----------------------------------------------------------
-st.sidebar.header("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Projects", "Contact"])
+# ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+st.sidebar.title("🔖 Navigation")
+# 带 Emoji 的单选按钮
+page = st.sidebar.radio(
+    "Go to",
+    ["🏠 Home", "💼 Projects", "📫 Contact"],
+    index=0,
+)
 
 language = st.sidebar.selectbox("Language / 语言", LANGS, index=0)
 texts = CONTENT[language]
@@ -118,72 +130,61 @@ texts = CONTENT[language]
 st.sidebar.markdown("---")
 st.sidebar.caption("© 2025 Leon Zhang")
 
-# ---------- UTILITIES --------------------------------------------------------
-
+# ─── SECTIONS ────────────────────────────────────────────────────────────────
 def hero_section():
     st.markdown(
         f"""
-        <div style='padding:4rem 0; background:#f4ffe6; width:100%;'>
-            <h1 style='font-size:3.5rem; line-height:1.15; margin:0;'>
-                {texts['hero_title']}
-            </h1>
+        <div style='padding:3rem; background:#f4ffe6;'>
+          <h1 style='font-size:3.5rem; margin:0;'>{texts['hero_title']}</h1>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-
 def about_section():
-    col1, col2 = st.columns([1, 2], gap="large")
-    with col1:
-        # ---- Avatar ----
-        img_path = Path("images/avatar.jpg")
-        if img_path.exists():
-            st.image(str(img_path), width=200, caption="Leon Zhang")
+    c1, c2 = st.columns([1, 2], gap="large")
+    with c1:
+        p = Path("images/avatar.jpg")
+        if p.exists():
+            st.image(str(p), width=180, caption="Leon Zhang")
         else:
-            st.write("(Upload avatar.jpg to /images to display your photo)")
-
-    with col2:
+            st.write("⚠️ Upload `avatar.jpg` to `/images` to show your photo.")
+    with c2:
         st.subheader(texts["about_title"])
         st.markdown(texts["about_body"], unsafe_allow_html=True)
 
-
 def projects_section():
-    proj_data = texts["projects"]
-    for proj in proj_data:
+    st.markdown("## Projects / 项目")
+    for proj in texts["projects"]:
         st.markdown("---")
-        cols = st.columns([2, 3])
-        with cols[0]:
-            img_path = Path(proj["img"])
-            if img_path.exists():
-                st.image(str(img_path), use_column_width=True)
+        col_img, col_txt = st.columns([2, 3])
+        with col_img:
+            p = Path(proj["img"])
+            if p.exists():
+                st.image(str(p), use_column_width=True)
             else:
-                st.write("(Place holder – add image)")
-        with cols[1]:
+                st.write("⚠️ Place your image in `/images`")
+        with col_txt:
             st.markdown(f"### {proj['name']}")
             st.caption(proj["subtitle"])
             st.markdown(f"[→ View details]({proj['link']})")
 
-
 def contact_section():
-    st.markdown("## 📫 Contact")
+    st.markdown("## 📫 Contact / 联系方式")
     for k, v in texts["contact"].items():
         if v.startswith("http"):
             st.markdown(f"**{k}:** [{v}]({v})")
         else:
             st.markdown(f"**{k}:** {v}")
 
-# ---------- PAGE ROUTING -----------------------------------------------------
-if page == "Home":
-    hero_section()
-    about_section()
-elif page == "Projects":
-    st.markdown("## 💼 Projects / 项目")
+# ─── ROUTING ─────────────────────────────────────────────────────────────────
+if page.startswith("🏠"):
+    hero_section(); about_section()
+elif page.startswith("💼"):
     projects_section()
-elif page == "Contact":
+else:
     contact_section()
 
-# ---------- FOOTER -----------------------------------------------------------
-with st.container():
-    st.markdown("---")
-    st.caption("Made with Streamlit • Last updated: May 2025")
+# ─── FOOTER ──────────────────────────────────────────────────────────────────
+st.markdown("---")
+st.caption("Made with Streamlit • Last updated: May 2025")
