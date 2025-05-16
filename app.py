@@ -1,6 +1,6 @@
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃  Leon Zhang – Streamlit Portfolio Web                  ┃
-# ┃  Single-file app │ 双语切换 │ 侧边栏导航 │ 图像优雅降级  ┃
+# ┃  单文件 · 双语切换 · 顶部导航 · 全宽 Hero 区域           ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import streamlit as st
@@ -11,17 +11,45 @@ st.set_page_config(
     page_title="Leon Zhang Portfolio",
     page_icon="😊",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",  # 折叠侧边栏
 )
 
 # ─── CUSTOM CSS ──────────────────────────────────────────────────────────────
 st.markdown(
     """
     <style>
-      /* 把侧边栏背景改为浅灰 */
-      [data-testid="stSidebar"] { background-color: #f7f8fa; }
-      /* 给主区内容添加一点内边距 */
+      /* 隐藏默认侧边栏 */
+      [data-testid="stSidebar"] { display: none; }
+
+      /* 主内容区内边距 */
       .css-18e3th9 { padding-top:1rem; padding-left:2rem; padding-right:2rem; }
+
+      /* Hero 全宽样式 */
+      .hero {
+        width:100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        padding: 3rem;
+        background: #f4ffe6;
+      }
+
+      /* 顶部导航 & 语言选择 */
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+      .top-bar .nav-tabs button {
+        margin-right: 1rem;
+        font-size: 1rem;
+      }
+      .top-bar .nav-tabs button:hover {
+        background-color: #e0f0ff;
+      }
     </style>
     """,
     unsafe_allow_html=True,
@@ -29,7 +57,6 @@ st.markdown(
 
 # ─── DATA ────────────────────────────────────────────────────────────────────
 LANGS = ["English", "中文"]
-
 CONTENT = {
     "English": {
         "hero_title": "🥳 Hi there!<br>This is Leon 张曾.<br>A product designer",
@@ -115,27 +142,24 @@ CONTENT = {
     },
 }
 
-# ─── SIDEBAR ──────────────────────────────────────────────────────────────────
-st.sidebar.title("🔖 Navigation")
-# 带 Emoji 的单选按钮
-page = st.sidebar.radio(
-    "Go to",
-    ["🏠 Home", "💼 Projects", "📫 Contact"],
-    index=0,
-)
+# ─── TOP NAV & LANGUAGE ───────────────────────────────────────────────────────
+# 横向选项卡做导航
+st.markdown('<div class="top-bar">', unsafe_allow_html=True)
+tabs = st.tabs(["🏠 Home", "💼 Projects", "📫 Contact"])
+# 语言选择放在右侧
+language = st.selectbox("Language / 语言", LANGS, index=0)
+st.markdown('</div>', unsafe_allow_html=True)
 
-language = st.sidebar.selectbox("Language / 语言", LANGS, index=0)
 texts = CONTENT[language]
-
-st.sidebar.markdown("---")
-st.sidebar.caption("© 2025 Leon Zhang")
 
 # ─── SECTIONS ────────────────────────────────────────────────────────────────
 def hero_section():
     st.markdown(
         f"""
-        <div style='padding:3rem; background:#f4ffe6;'>
-          <h1 style='font-size:3.5rem; margin:0;'>{texts['hero_title']}</h1>
+        <div class="hero">
+          <h1 style="font-size:3.5rem; line-height:1.2; margin:0;">
+            {texts['hero_title']}
+          </h1>
         </div>
         """,
         unsafe_allow_html=True,
@@ -148,23 +172,23 @@ def about_section():
         if p.exists():
             st.image(str(p), width=180, caption="Leon Zhang")
         else:
-            st.write("⚠️ Upload avatar.jpg to /images to show your photo.")
+            st.write("⚠️ Upload `avatar.jpg` 到 `images/` 文件夹以显示头像")
     with c2:
         st.subheader(texts["about_title"])
         st.markdown(texts["about_body"], unsafe_allow_html=True)
 
 def projects_section():
-    st.markdown("## Projects / 项目")
+    st.markdown("## 💼 Projects / 项目")
     for proj in texts["projects"]:
         st.markdown("---")
-        col_img, col_txt = st.columns([2, 3])
-        with col_img:
-            p = Path(proj["img"])
-            if p.exists():
-                st.image(str(p), use_container_width=True)
+        col1, col2 = st.columns([2, 3])
+        with col1:
+            img_p = Path(proj["img"])
+            if img_p.exists():
+                st.image(str(img_p), use_container_width=True)
             else:
-                st.write("⚠️ Place your image in /images")
-        with col_txt:
+                st.write("⚠️ 将项目图片放到 `images/` 文件夹里")
+        with col2:
             st.markdown(f"### {proj['name']}")
             st.caption(proj["subtitle"])
             st.markdown(f"[→ View details]({proj['link']})")
@@ -177,12 +201,13 @@ def contact_section():
         else:
             st.markdown(f"**{k}:** {v}")
 
-# ─── ROUTING ─────────────────────────────────────────────────────────────────
-if page.startswith("🏠"):
-    hero_section(); about_section()
-elif page.startswith("💼"):
+# ─── PAGE ROUTING ────────────────────────────────────────────────────────────
+with tabs[0]:
+    hero_section()
+    about_section()
+with tabs[1]:
     projects_section()
-else:
+with tabs[2]:
     contact_section()
 
 # ─── FOOTER ──────────────────────────────────────────────────────────────────
