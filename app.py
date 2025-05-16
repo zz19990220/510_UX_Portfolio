@@ -161,7 +161,7 @@ def projects_section():
         with col_img:
             p = Path(proj["img"])
             if p.exists():
-                st.image(str(p), use_column_width=True)
+                st.image(str(p), use_container_width=True)
             else:
                 st.write("⚠️ Place your image in `/images`")
         with col_txt:
