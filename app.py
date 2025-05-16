@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 from pathlib import Path
 import datetime
@@ -217,4 +216,3 @@ st.markdown(
     f"<div class='footer'>Made with Streamlit • Last updated: {datetime.date.today():%b %Y}</div>",
     unsafe_allow_html=True,
 )
-```
