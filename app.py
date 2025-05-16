@@ -1,6 +1,10 @@
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃  Leon Zhang – Streamlit Portfolio Web                  ┃
+# ┃  Single-file app │ 双语切换 │ 侧边栏导航 │ 图像优雅降级  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 import streamlit as st
 from pathlib import Path
-import datetime
 
 # ─── CONFIG ──────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -14,49 +18,10 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-      :root {
-        --brand: #4B2E83;
-        --brand-light: rgba(75,46,131,0.06);
-      }
-      /* 全局字体 & 行距 */
-      body, p, li {
-        font-family: 'Inter', 'Noto Sans SC', sans-serif !important;
-        line-height: 1.6 !important;
-      }
-      h1, h2, h3 {
-        font-weight: 700;
-        color: #222;
-        margin-bottom: 1rem;
-      }
-      /* Hero 区 */
-      .hero {
-        background: var(--brand-light);
-        padding: 4rem 3rem;
-        border-radius: 12px;
-        max-width: 800px;
-        margin: 0 auto 2rem auto;
-      }
-      .hero .emoji {
-        font-size: 1.2em;
-        vertical-align: middle;
-      }
-      /* Sidebar 宽度 & 配色 */
-      [data-testid="stSidebar"] {
-        background: #f5f5f7 !important;
-        width: 200px !important;
-      }
-      /* 主区内边距 */
-      .css-18e3th9 {
-        padding-top: 1rem !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
-      }
-      /* Footer 居中 */
-      .footer {
-        text-align: center;
-        margin-top: 2rem;
-        color: #555;
-      }
+      /* 把侧边栏背景改为浅灰 */
+      [data-testid="stSidebar"] { background-color: #f7f8fa; }
+      /* 给主区内容添加一点内边距 */
+      .css-18e3th9 { padding-top:1rem; padding-left:2rem; padding-right:2rem; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -67,7 +32,7 @@ LANGS = ["English", "中文"]
 
 CONTENT = {
     "English": {
-        "hero_title": "<span class='emoji'>🥳</span> Hi there!<br>This is Leon 张曾.<br>A product designer",
+        "hero_title": "🥳 Hi there!<br>This is Leon 张曾.<br>A product designer",
         "about_title": "Hey~",
         "about_body": (
             "I'm an <b>HCI Master's candidate @ University of Washington</b>, "
@@ -109,7 +74,7 @@ CONTENT = {
         },
     },
     "中文": {
-        "hero_title": "<span class='emoji'>🥳</span> 嗨！<br>我是张曾 Leon。<br>一名产品设计师",
+        "hero_title": "🥳 嗨！<br>我是张曾 Leon。<br>一名产品设计师",
         "about_title": "嘿~",
         "about_body": (
             "我目前就读于<b>华盛顿大学 HCI 硕士</b>，正在寻找 2024 年暑期实习机会。"
@@ -152,33 +117,44 @@ CONTENT = {
 
 # ─── SIDEBAR ──────────────────────────────────────────────────────────────────
 st.sidebar.title("🔖 Navigation")
-page = st.sidebar.radio("Go to", ["🏠 Home", "💼 Projects", "📫 Contact"], index=0)
+# 带 Emoji 的单选按钮
+page = st.sidebar.radio(
+    "Go to",
+    ["🏠 Home", "💼 Projects", "📫 Contact"],
+    index=0,
+)
+
 language = st.sidebar.selectbox("Language / 语言", LANGS, index=0)
 texts = CONTENT[language]
+
 st.sidebar.markdown("---")
 st.sidebar.caption("© 2025 Leon Zhang")
 
 # ─── SECTIONS ────────────────────────────────────────────────────────────────
 def hero_section():
     st.markdown(
-        f"<div class='hero'><h1>{texts['hero_title']}</h1></div>",
+        f"""
+        <div style='padding:3rem; background:#f4ffe6;'>
+          <h1 style='font-size:3.5rem; margin:0;'>{texts['hero_title']}</h1>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
 def about_section():
-    c1, c2 = st.columns([1, 3], gap="large")
+    c1, c2 = st.columns([1, 2], gap="large")
     with c1:
         p = Path("images/avatar.jpg")
         if p.exists():
-            st.image(str(p), width=180, caption="Portrait of Leon Zhang", use_column_width=False)
+            st.image(str(p), width=180, caption="Leon Zhang")
         else:
-            st.warning("⚠️ Upload `avatar.jpg` to `/images` to show your photo.")
+            st.write("⚠️ Upload avatar.jpg to /images to show your photo.")
     with c2:
         st.subheader(texts["about_title"])
         st.markdown(texts["about_body"], unsafe_allow_html=True)
 
 def projects_section():
-    st.markdown("## Projects / 项目", unsafe_allow_html=True)
+    st.markdown("## Projects / 项目")
     for proj in texts["projects"]:
         st.markdown("---")
         col_img, col_txt = st.columns([2, 3])
@@ -187,7 +163,7 @@ def projects_section():
             if p.exists():
                 st.image(str(p), use_container_width=True)
             else:
-                st.error("⚠️ Place your image in `/images`")
+                st.write("⚠️ Place your image in /images")
         with col_txt:
             st.markdown(f"### {proj['name']}")
             st.caption(proj["subtitle"])
@@ -203,8 +179,7 @@ def contact_section():
 
 # ─── ROUTING ─────────────────────────────────────────────────────────────────
 if page.startswith("🏠"):
-    hero_section()
-    about_section()
+    hero_section(); about_section()
 elif page.startswith("💼"):
     projects_section()
 else:
@@ -212,7 +187,4 @@ else:
 
 # ─── FOOTER ──────────────────────────────────────────────────────────────────
 st.markdown("---")
-st.markdown(
-    f"<div class='footer'>Made with Streamlit • Last updated: {datetime.date.today():%b %Y}</div>",
-    unsafe_allow_html=True,
-)
+st.caption("Made with Streamlit • Last updated: May 2025")
